@@ -9,8 +9,8 @@ app = Flask(__name__)
 # 🔐 CONFIGURACIÓN DESDE VARIABLES DE ENTORNO (Render)
 # =========================================================
 VERIFY_TOKEN = os.environ.get("VERIFY_TOKEN", "entre_almohadonesESADzz_564")
-ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN", "")
-PHONE_NUMBER_ID = os.environ.get("PHONE_NUMBER_ID", "")
+ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN", "EAALTG2mgqZBYBPq3k0ZAPMeypUf66zTKkeAenu7pst6GbsOx7Evp95tGRDssHgV5amHtHMFkPRFTrBmP1WZC8qHkd7BLyC0WJafZC1RrAXEi2TIIF3Y8vRMO5WIBkyFeZBZC7JijuwkydloZBLONQaCFqZCm2H2HGCG1dZBOKquW19DmZAvtmG7WgqM34ZBKbnWY66beDZC46dt3070ELbFR1CGQiZBEEZBpNq77TLZBDkwyFJwJrwZD")
+PHONE_NUMBER_ID = os.environ.get("PHONE_NUMBER_ID", "837114692818661")
 API_BUSCADOR = os.environ.get(
     "API_BUSCADOR",
     "https://www.entrealmohadones.es/api_local.php?q={}"
