@@ -7,9 +7,9 @@ app = Flask(__name__)
 # ================================
 # 🔐 CONFIGURACIÓN
 # ================================
-VERIFY_TOKEN = "entrealmohadones_secret"  # Usa el mismo en Meta Developers
-ACCESS_TOKEN = "{{ACCESS_TOKEN_DE_META}}"  # lo pondrás luego en Meta
-PHONE_NUMBER_ID = "{{PHONE_NUMBER_ID}}"    # lo copias de tu panel de WhatsApp Cloud API
+VERIFY_TOKEN = "entre_almohadonesESADzz_564"  # Usa el mismo en Meta Developers
+ACCESS_TOKEN = "{{EAALTG2mgqZBYBPrmnF7S4EwdsZBGhFX4OQtZCZAky81h9oIkceZCtrQ4VoKf8eKZC2EIdlsiYzhjcwHrxxsK6sqEP0AIHwAKWriUoyG89ATkBFBHk03gJ4nPp35lEFwTPMTpSR0EiPzvVSjTZBPLEQLmZAcfQC0JWAFokLMk478WpNfrJeNQ0PW6GQBKhObXxgReO7fKTfi1zaYb6WOYaSGpQy8Xi1Fx74BNkxrMJ6ZC14AZDZD}}"  # lo pondrás luego en Meta
+PHONE_NUMBER_ID = "{{837114692818661}}"    # lo copias de tu panel de WhatsApp Cloud API
 API_BUSCADOR = "https://entrealmohadones-api.onrender.com/precio?articulo={}"
 
 # ================================
