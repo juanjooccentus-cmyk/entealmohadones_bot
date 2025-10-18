@@ -9,7 +9,7 @@ app = Flask(__name__)
 # 🔐 CONFIGURACIÓN DESDE VARIABLES DE ENTORNO (Render)
 # =========================================================
 VERIFY_TOKEN = os.environ.get("VERIFY_TOKEN", "entre_almohadonesESADzz_564")
-ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN", "EAAgDW5kZBzlYBPpG8LuxIWsjomXWJVNYaTmKYZCIVdgxMdkxM6zrHWoYHfAaQFgCXUHowsqGFBLuf89sqxhqBf88YFxA1fnuE8IyElY5Uu2kZBeHUk9ZAt0JBTs7qR9ytPYn1FAEQkomZAysXuhci65IBA5vqL64ymXHmEgQ87KHXXKFYMZBws8Cql3kaZAoWgDkvd9C4d15zpUJY2aZCimpZBf30CPl8hvpQnnk2UJBnzwZDZD")
+ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN", "EAAVtZA3TDbK8BPkzV4G0OfaY1VFhhmatGDb7GdnlnZClYPsghfbE1n43IKW5at0jxz2F5eEZAJ6CQlDPOqGAHDsE2cWAtSuMe3atM8qqwwBKOhyPKlJIxEGxYwDyZCOdsbuJGtPd9vJIOqAYjkrxYbzDjPb4TDM34BIa4B87CGTfjMO5bfjQbVlNmSZBsNLOzxIYBEZAwz6YXktAqSewsOQLaU0tptln4nwp7H4vdQ2wZDZD")
 PHONE_NUMBER_ID = os.environ.get("PHONE_NUMBER_ID", "837114692818661")
 API_BUSCADOR = os.environ.get(
     "API_BUSCADOR",
