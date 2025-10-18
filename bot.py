@@ -10,7 +10,7 @@ app = Flask(__name__)
 VERIFY_TOKEN = "entre_almohadonesESADzz_564"  # Usa el mismo en Meta Developers
 ACCESS_TOKEN = "EAALTG2mgqZBYBPsZBzZA6zlaZB2FM8dZBmqjRdUpkXXcHDf0AGzart1bNKxZAZCyPB3AHSfXV6jhieqB060V6AlIaZAzi1Qri87CpYrnG5XDbdy1a0IXD8U3Gm3cjl6ltuM2jzwRUErRU3PweIG5KVKHWCYOw1Uv0RZCaVbPfpMZBzTx7X6w0B8CL3oRox7GChv40aGWXtjaJCb6cvWTZCBWJJHZB7d2AZAyccZBHwTCAUNMFDZB1IZD"
 PHONE_NUMBER_ID = "837114692818661"
-API_BUSCADOR = "https://entrealmohadones-api.onrender.com/precio?articulo={}"
+API_BUSCADOR = "https://www.entrealmohadones.es/api_local.php?q={}"
 
 # ================================
 # 🧩 FORMATEO DE RESPUESTA
