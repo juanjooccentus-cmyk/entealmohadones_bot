@@ -1,45 +1,54 @@
 from flask import Flask, request, jsonify
 import requests
 import json
+import os
 
 app = Flask(__name__)
 
-# ================================
-# 🔐 CONFIGURACIÓN
-# ================================
-VERIFY_TOKEN = "entre_almohadonesESADzz_564"  # Usa el mismo en Meta Developers
-ACCESS_TOKEN = "EAALTG2mgqZBYBPsZBzZA6zlaZB2FM8dZBmqjRdUpkXXcHDf0AGzart1bNKxZAZCyPB3AHSfXV6jhieqB060V6AlIaZAzi1Qri87CpYrnG5XDbdy1a0IXD8U3Gm3cjl6ltuM2jzwRUErRU3PweIG5KVKHWCYOw1Uv0RZCaVbPfpMZBzTx7X6w0B8CL3oRox7GChv40aGWXtjaJCb6cvWTZCBWJJHZB7d2AZAyccZBHwTCAUNMFDZB1IZD"
-PHONE_NUMBER_ID = "837114692818661"
-API_BUSCADOR = "https://www.entrealmohadones.es/api_local.php?q={}"
+# =========================================================
+# 🔐 CONFIGURACIÓN DESDE VARIABLES DE ENTORNO (Render)
+# =========================================================
+VERIFY_TOKEN = os.environ.get("VERIFY_TOKEN", "entre_almohadonesESADzz_564")
+ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN", "")
+PHONE_NUMBER_ID = os.environ.get("PHONE_NUMBER_ID", "")
+API_BUSCADOR = os.environ.get(
+    "API_BUSCADOR",
+    "https://www.entrealmohadones.es/api_local.php?q={}"
+)
 
-# ================================
+# =========================================================
 # 🧩 FORMATEO DE RESPUESTA
-# ================================
+# =========================================================
 def formatear_mensaje(resultados, to):
+    """Convierte resultados en mensajes interactivos de WhatsApp."""
     mensajes = []
     for r in resultados[:3]:  # máximo 3 productos
+        articulo = r.get('articulo', 'Producto')
+        precio = r.get('precio', 'Consultar')
+        fuente = r.get('fuente', 'Online')
+        descripcion = r.get('descripcion', '')
+        url = r.get('url', '')
+        imagen = r.get('imagen', '')
+
         msg = {
             "messaging_product": "whatsapp",
-            "recipient_type": "individual",
             "to": to,
             "type": "interactive",
             "interactive": {
                 "type": "button",
                 "header": {
                     "type": "image",
-                    "image": {"link": r.get("imagen")}
+                    "image": {"link": imagen}
                 },
                 "body": {
-                    "text": f"*{r.get('articulo','')}*\n💶 {r.get('precio','Consultar')}\n📍 {r.get('fuente','')}\n🛍️ {r.get('descripcion','')}"
+                    "text": f"*{articulo}*\n💶 {precio}\n📍 {fuente}\n{descripcion}"
                 },
-                "footer": {
-                    "text": "Consulta disponibilidad o haz tu pedido online"
-                },
+                "footer": {"text": "Consulta disponibilidad o haz tu pedido online"},
                 "action": {
                     "buttons": [
                         {
                             "type": "url",
-                            "url": r.get("url"),
+                            "url": url,
                             "title": "Ver en tienda 🛒"
                         }
                     ]
@@ -50,92 +59,99 @@ def formatear_mensaje(resultados, to):
     return mensajes
 
 
-# ================================
-# 🌐 WEBHOOK (VERIFICACIÓN + MENSAJES)
-# ================================
-@app.route("/webhook", methods=["GET", "POST"])
-def webhook():
-    if request.method == "GET":
-        # ✅ Verificación inicial de Meta
-        mode = request.args.get("hub.mode")
-        token = request.args.get("hub.verify_token")
-        challenge = request.args.get("hub.challenge")
+# =========================================================
+# 🌐 WEBHOOK - VERIFICACIÓN META
+# =========================================================
+@app.route("/webhook", methods=["GET"])
+def verify():
+    """Verificación inicial con Meta Developers"""
+    mode = request.args.get("hub.mode")
+    token = request.args.get("hub.verify_token")
+    challenge = request.args.get("hub.challenge")
 
+    if mode and token:
         if mode == "subscribe" and token == VERIFY_TOKEN:
-            print("✅ Webhook verificado correctamente con Meta.")
             return challenge, 200
-        else:
-            print("❌ Verificación fallida: token incorrecto o modo no válido.")
-            return "Verification failed", 403
+    return "Verification failed", 403
 
-    elif request.method == "POST":
-        # ✅ Mensajes entrantes de WhatsApp
-        data = request.get_json()
-        print("📩 Mensaje recibido:", json.dumps(data, indent=2, ensure_ascii=False))
 
-        try:
-            for entry in data.get("entry", []):
-                for change in entry.get("changes", []):
-                    value = change.get("value", {})
-                    if "messages" in value:
-                        message = value["messages"][0]
-                        phone_number = message["from"]
-                        texto = message.get("text", {}).get("body", "").strip().lower()
+# =========================================================
+# 📩 WEBHOOK - RECEPCIÓN DE MENSAJES
+# =========================================================
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    """Recibe mensajes desde WhatsApp"""
+    data = request.get_json()
 
-                        if not texto:
-                            continue
+    try:
+        for entry in data.get("entry", []):
+            for change in entry.get("changes", []):
+                value = change.get("value", {})
+                if "messages" in value:
+                    message = value["messages"][0]
+                    phone_number = message["from"]
+                    texto = message.get("text", {}).get("body", "").strip().lower()
 
-                        print(f"🔎 Consultando API con: {texto}")
-                        resp = requests.get(API_BUSCADOR.format(texto))
-                        result = resp.json()
-                        print("📦 Respuesta API:", json.dumps(result, indent=2, ensure_ascii=False))
+                    if not texto:
+                        continue
 
-                        if "resultados" in result:
-                            mensajes = formatear_mensaje(result["resultados"], phone_number)
-                            for m in mensajes:
-                                requests.post(
-                                    f"https://graph.facebook.com/v20.0/{PHONE_NUMBER_ID}/messages",
-                                    headers={
-                                        "Authorization": f"Bearer {ACCESS_TOKEN}",
-                                        "Content-Type": "application/json"
-                                    },
-                                    data=json.dumps(m)
-                                )
-                                print(f"✅ Enviado mensaje con imagen y botón a {phone_number}")
-                        else:
-                            texto_fallo = {
-                                "messaging_product": "whatsapp",
-                                "to": phone_number,
-                                "text": {"body": f"No encontré resultados para '{texto}' 😕"}
-                            }
+                    # 🔍 Consulta al buscador híbrido (Entre Almohadones + proveedores)
+                    resp = requests.get(API_BUSCADOR.format(texto))
+                    if resp.status_code != 200:
+                        raise Exception(f"Error API {resp.status_code}: {resp.text}")
+
+                    result = resp.json()
+                    resultados = result.get("resultados", [])
+
+                    if resultados:
+                        mensajes = formatear_mensaje(resultados, phone_number)
+                        for m in mensajes:
                             requests.post(
                                 f"https://graph.facebook.com/v20.0/{PHONE_NUMBER_ID}/messages",
                                 headers={
                                     "Authorization": f"Bearer {ACCESS_TOKEN}",
                                     "Content-Type": "application/json"
                                 },
-                                data=json.dumps(texto_fallo)
+                                data=json.dumps(m)
                             )
-                            print(f"⚠️ No se encontraron resultados para {texto}")
+                    else:
+                        texto_fallo = {
+                            "messaging_product": "whatsapp",
+                            "to": phone_number,
+                            "text": {
+                                "body": f"No encontré resultados para '{texto}' 😕\n\nPrueba con otro nombre o revisa nuestra web 🏠"
+                            }
+                        }
+                        requests.post(
+                            f"https://graph.facebook.com/v20.0/{PHONE_NUMBER_ID}/messages",
+                            headers={
+                                "Authorization": f"Bearer {ACCESS_TOKEN}",
+                                "Content-Type": "application/json"
+                            },
+                            data=json.dumps(texto_fallo)
+                        )
 
-        except Exception as e:
-            print("❌ Error procesando mensaje:", e)
+    except Exception as e:
+        print("❌ Error en webhook:", e)
 
-        return "OK", 200
+    return "OK", 200
 
 
-# ================================
-# 🏠 HOME (comprobación rápida)
-# ================================
+# =========================================================
+# 🏠 HOME (Diagnóstico rápido)
+# =========================================================
 @app.route("/")
 def home():
     return jsonify({
         "status": "ok",
-        "message": "🤖 Bot Entre Almohadones activo y escuchando WhatsApp"
+        "message": "🤖 Bot Entre Almohadones activo y escuchando WhatsApp",
+        "api_buscador": API_BUSCADOR
     })
 
 
+# =========================================================
+# 🚀 ARRANQUE DEL SERVIDOR FLASK
+# =========================================================
 if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", 10000))  # Render define su propio puerto
+    port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
